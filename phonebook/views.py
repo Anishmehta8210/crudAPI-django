@@ -14,3 +14,17 @@ class VcardList(APIView):
     def get(self ,req ):
        
         return Response(self.serializer.data,status=200)
+    
+    def post(self,r):
+        data = {
+            "name": r.POST.get("name"),
+            "contact": r.POST.get("contact"),
+        }
+        serializer = VcardSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=200)
+
+    
+
+
