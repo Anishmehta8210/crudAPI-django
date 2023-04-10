@@ -1,11 +1,13 @@
 from django.shortcuts import render
 from rest_framework.generics import GenericAPIView
 from rest_framework import generics
-from .serializers import VcardSerializer
+from .serializers import VcardSerializer,MyTokenObtainPairSerializer,RegisterSerializer
 from .models import Vcard
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.permissions import AllowAny,IsAuthenticated
+from django.contrib.auth.models import User
 # Create your views here.
 
 class VcardList(APIView):
@@ -27,17 +29,16 @@ class VcardList(APIView):
             serializer.save()
             return Response(serializer.data,status=200)
         
-
-
 class VcardDetails(generics.GenericAPIView):
     serializer_class = VcardSerializer
+    permission_classes = (IsAuthenticated,)
 
-    def get(self,id=None):
+    def get(self,req,id=None):
         singleVcard = Vcard.objects.get(id=id)
         serializer = VcardSerializer(singleVcard)
         return Response(serializer.data,status=200)
     
-    def delete(self,id=None):
+    def delete(self,req,id=None):
         singleVcard = Vcard.objects.get(id=id)
         singleVcard.delete()
         return Response(status=200)
@@ -52,6 +53,11 @@ class VcardDetails(generics.GenericAPIView):
         else:
             return Response({"msg":"record not updated","error":serializer.errors})
 
-    
+class MyObtainTokenPairView(TokenObtainPairView):
+    permission_classes = (AllowAny,)
+    serializer_class = MyTokenObtainPairSerializer
 
-
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    permission_classes = (AllowAny,)
+    serializer_class = RegisterSerializer
